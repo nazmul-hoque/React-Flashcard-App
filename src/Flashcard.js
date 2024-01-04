@@ -1,39 +1,47 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 export default function Flashcard({ flashcard }) {
-  const [flip, setFlip] = useState(false)
-  const [height, setHeight] = useState('initial')
+  const [flip, setFlip] = useState(false);
+  const [height, setHeight] = useState('initial');
 
-  const frontEl = useRef()
-  const backEl = useRef()
+  const frontEl = useRef();
+  const backEl = useRef();
+
+  const flipHandler = useCallback(() => setFlip((prevFlip) => !prevFlip), []);
+
+  const { question, answer, options } = flashcard;
 
   function setMaxHeight() {
-    const frontHeight = frontEl.current.getBoundingClientRect().height
-    const backHeight = backEl.current.getBoundingClientRect().height
-    setHeight(Math.max(frontHeight, backHeight, 100))
+    const frontHeight = frontEl.current.getBoundingClientRect().height;
+    const backHeight = backEl.current.getBoundingClientRect().height;
+    setHeight(Math.max(frontHeight, backHeight, 100));
   }
 
-  useEffect(setMaxHeight, [flashcard.question, flashcard.answer, flashcard.options])
+  useEffect(setMaxHeight, [question, answer, options]);
   useEffect(() => {
-    window.addEventListener('resize', setMaxHeight)
-    return () => window.removeEventListener('resize', setMaxHeight)
-  }, [])
+    window.addEventListener('resize', setMaxHeight);
+    return () => window.removeEventListener('resize', setMaxHeight);
+  }, []);
 
   return (
     <div
       className={`card ${flip ? 'flip' : ''}`}
-      style={{ height: height }}
-      onClick={() => setFlip(!flip)}
+      style={{ height }}
+      onClick={flipHandler}
     >
       <div className="front" ref={frontEl}>
-        {flashcard.question}
+        {question}
         <div className="flashcard-options">
-          {flashcard.options.map(option => {
-            return <div className="flashcard-option" key={option}>{option}</div>
-          })}
+          {options.map((option) => (
+            <div className="flashcard-option" key={option}>
+              {option}
+            </div>
+          ))}
         </div>
       </div>
-      <div className="back" ref={backEl}>{flashcard.answer}</div>
+      <div className="back" ref={backEl}>
+        {answer}
+      </div>
     </div>
-  )
+  );
 }
